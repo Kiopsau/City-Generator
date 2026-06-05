@@ -3,7 +3,7 @@ package citygen.graph;
 import java.util.ArrayList;
 import java.util.List;
 
-import citygen.city.districts.blocks.Block;
+import citygen.city.districts.District;
 import citygen.city.roads.Edge;
 import citygen.city.roads.Node;
 
@@ -11,12 +11,12 @@ import citygen.city.roads.Node;
 public class Graph {
     private List<Node> nodes; 
     private List<Edge> edges; 
-    private List<Block> blocks; 
+    private List<District> districts; 
 
     public Graph() {
         nodes = new ArrayList<>();
         edges = new ArrayList<>();
-        blocks = new ArrayList<>(); 
+        districts = new ArrayList<>(); 
     }
 
     public void addNode(Node node) {
@@ -27,8 +27,8 @@ public class Graph {
         edges.add(edge);
     }
 
-    public void addBlock(Block block) {
-        blocks.add(block); 
+    public void addDistrict(District district) {
+        districts.add(district); 
     }
 
 
@@ -40,8 +40,8 @@ public class Graph {
         return edges;
     } 
 
-    public List<Block> getBlocks() {
-        return blocks; 
+    public List<District> getDistricts() {
+        return districts; 
     }
 
 

@@ -1,19 +1,21 @@
-package citygen.city.blocks;
+package citygen.city.districts.blocks;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import citygen.city.blocks.buildings.Building;
+import citygen.city.districts.District;
+import citygen.city.districts.blocks.buildings.Building;
 import citygen.city.roads.Node;
 
-public class Block {    
-    List<Node> corners; 
-    List<Building> buildings; 
+public class Block {
+    private final District district; 
 
-    public Block(List<Node> corners) {
-        this.corners = corners; 
-    } 
+    private final List<Node> corners;
+    private final List<Building> buildings;
 
-    public List<Node> getCorners() {
-        return corners; 
-    } 
+    public Block(District district, List<Node> corners) {
+        this.district = district; 
+        this.corners = corners;
+        this.buildings = new ArrayList<>();
+    }
 }
