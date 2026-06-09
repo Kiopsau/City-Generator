@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import citygen.city.districts.District;
+import citygen.city.districts.blocks.Block;
 import citygen.city.roads.Edge;
 import citygen.city.roads.Node;
 
@@ -12,11 +13,13 @@ public class Graph {
     private List<Node> nodes; 
     private List<Edge> edges; 
     private List<District> districts; 
+    private List<Block> blocks; 
 
     public Graph() {
         nodes = new ArrayList<>();
         edges = new ArrayList<>();
         districts = new ArrayList<>(); 
+        blocks = new ArrayList<>(); 
     }
 
     public void addNode(Node node) {
@@ -31,7 +34,9 @@ public class Graph {
         districts.add(district); 
     }
 
-
+    public void addBlock(Block block) {
+        blocks.add(block); 
+    }
     public List<Node> getNodes() {
         return nodes;
     }
@@ -42,6 +47,10 @@ public class Graph {
 
     public List<District> getDistricts() {
         return districts; 
+    } 
+
+    public List<Block> getBlocks() {
+        return blocks; 
     }
 
 

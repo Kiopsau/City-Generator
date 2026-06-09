@@ -7,9 +7,11 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.List;
 
 import javax.swing.JPanel;
 
+import citygen.city.districts.blocks.Block;
 import citygen.city.roads.Edge;
 import citygen.city.roads.Node;
 import citygen.graph.Graph;
@@ -108,7 +110,7 @@ public class Renderer extends JPanel {
 
 
         drawEdges(g2);
-        // drawBlocks(g2);
+        drawBlocks(g2);
         drawNodes(g2);
 
 
@@ -161,34 +163,34 @@ public class Renderer extends JPanel {
         }
     } 
 
-    // private final List<Color> colors = List.of(
-    //     Color.BLACK, Color.WHITE, Color.RED, Color.GREEN,
-    //     Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA,
-    //     Color.GRAY, Color.DARK_GRAY, Color.LIGHT_GRAY,
-    //     Color.ORANGE, Color.PINK
-    // );
+    private final List<Color> colors = List.of(
+        Color.BLACK, Color.WHITE, Color.RED, Color.GREEN,
+        Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA,
+        Color.GRAY, Color.DARK_GRAY, Color.LIGHT_GRAY,
+        Color.ORANGE, Color.PINK
+    );
 
 
-    // private void drawBlocks(Graphics2D g2) {
-    //     int i = 0;
+    private void drawBlocks(Graphics2D g2) {
+        int i = 0;
 
-    //     for (Block block : city.getBlocks()) {
-    //         List<Node> corners = block.getCorners();
-    //         if (corners.size() < 3) continue;
+        for (Block block : city.getBlocks()) {
+            List<Node> corners = block.getCorners();
+            if (corners.size() < 3) continue;
 
-    //         int[] xPoints = new int[corners.size()];
-    //         int[] yPoints = new int[corners.size()];
+            int[] xPoints = new int[corners.size()];
+            int[] yPoints = new int[corners.size()];
 
-    //         for (int j = 0; j < corners.size(); j++) {
-    //             xPoints[j] = (int) corners.get(j).getX();
-    //             yPoints[j] = (int) corners.get(j).getY();
-    //         }
+            for (int j = 0; j < corners.size(); j++) {
+                xPoints[j] = (int) corners.get(j).getX();
+                yPoints[j] = (int) corners.get(j).getY();
+            }
 
-    //         int colorIndex = Math.abs(block.getCorners().hashCode()) % colors.size(); 
-    //         g2.setColor(colors.get(colorIndex)); 
+            int colorIndex = Math.abs(block.getCorners().hashCode()) % colors.size(); 
+            g2.setColor(colors.get(colorIndex)); 
 
-    //         g2.fillPolygon(xPoints, yPoints, corners.size());
-    //         i++;
-    //     }
-    // }
+            g2.fillPolygon(xPoints, yPoints, corners.size());
+            i++;
+        }
+    }
 }
