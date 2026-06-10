@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D; 
 import java.awt.RenderingHints;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -29,7 +31,9 @@ public class Renderer extends JPanel {
     private double offsetY = 0; 
 
     private int lastX;
-    private int lastY;
+    private int lastY; 
+
+    private boolean showBlocks = false; 
 
     public Renderer(Graph city) {
         this.city = city;
@@ -55,7 +59,8 @@ public class Renderer extends JPanel {
             public void mousePressed(MouseEvent e) {
                 lastX = e.getX();
                 lastY = e.getY();
-            }
+            } 
+            
         }); 
 
         addMouseMotionListener(new MouseMotionAdapter() {
@@ -89,7 +94,16 @@ public class Renderer extends JPanel {
             offsetY = mouseY - ((mouseY - offsetY) * zoom / oldZoom);
 
             repaint();
-        });
+        }); 
+
+        addKeyListener(new KeyAdapter() {
+            @Override 
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    showBlocks = !showBlocks; 
+                }
+            }
+        }); 
     }
 
     @Override
@@ -173,7 +187,7 @@ public class Renderer extends JPanel {
 
     private void drawBlocks(Graphics2D g2) {
         int i = 0;
-
+        if (!showBlocks) return; 
         for (Block block : city.getBlocks()) {
             List<Node> corners = block.getCorners();
             if (corners.size() < 3) continue;

@@ -18,6 +18,17 @@ public class GraphBlockGenerator {
         this.graph = graph; 
     }
 
+    /*This road network is an organically grown, tree-dominated street layout that expands outward from a 
+    central starting point. Roads branch incrementally from existing intersections, with a bias toward 
+    extending newer branches, creating a natural sense of urban sprawl rather than dense clustering around 
+    the center. Minimum spacing rules keep intersections evenly distributed, while proximity checks prevent 
+    roads from crowding one another or creating unrealistically narrow blocks. Occasional loop connections
+     introduce alternative routes and improve connectivity, avoiding the rigidity of a pure tree structure. 
+     After generation, any road crossings are converted into proper intersections and nearby junctions are 
+     merged, resulting in a clean, coherent network that resembles the street patterns commonly found in 
+     suburban developments, small towns, or organically evolved cities rather than a strict grid-based plan. */
+
+
     public Graph generate() {
 
         List<List<Node>> faces = new ArrayList<>();
