@@ -14,8 +14,8 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import citygen.city.districts.blocks.Block;
-import citygen.city.roads.Edge;
 import citygen.city.roads.Node;
+import citygen.city.roads.edges.Edge;
 import citygen.graph.Graph;
 import citygen.utils.Utils;
 ;
@@ -122,11 +122,10 @@ public class Renderer extends JPanel {
         g2.scale(zoom, zoom);
 
 
-
+        
         drawEdges(g2);
-        drawBlocks(g2);
         drawNodes(g2);
-
+        drawBlocks(g2);
 
 
         g2.dispose(); 

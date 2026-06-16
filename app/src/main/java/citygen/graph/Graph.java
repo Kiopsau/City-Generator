@@ -5,8 +5,8 @@ import java.util.List;
 
 import citygen.city.districts.District;
 import citygen.city.districts.blocks.Block;
-import citygen.city.roads.Edge;
 import citygen.city.roads.Node;
+import citygen.city.roads.edges.Edge;
 
 
 public class Graph {

@@ -2,10 +2,13 @@ package citygen.city.roads;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
+import citygen.city.roads.edges.Edge;
 import citygen.graph.Graph;
 import citygen.utils.Utils;
 
@@ -255,8 +258,62 @@ public class GraphRoadGenerator {
 
         mergeCloseNodes(graph); 
 
+        normalizeGraph(graph); 
+
+        for (Node n : graph.getNodes()) {
+            n.sortEdgesAndNeighbors(); 
+        }
+
+        for (Node n : new ArrayList<>(graph.getNodes())) {
+            if (n.getEdges().isEmpty()) {
+                graph.removeNode(n);
+            }
+        }
+
         return graph;
     }
+
+
+
+    private void normalizeGraph(Graph graph) {
+        // 1. Remove duplicate edges 
+        Set<Edge> unique = new HashSet<>();
+        List<Edge> toRemove = new ArrayList<>();
+
+        for (Edge e : graph.getEdges()) {
+            if (!unique.add(e)) {
+                toRemove.add(e);
+            }
+        }
+
+        for (Edge e : toRemove) {
+            graph.removeEdge(e);
+            e.getA().removeEdge(e);
+            e.getB().removeEdge(e);
+        }
+
+        // 2. FULL RESET 
+        for (Node n : graph.getNodes()) {
+            n.getNeighbors().clear();
+            n.getEdges().clear();
+        }
+
+        // 3. Rebuild strictly from graph edges
+        for (Edge e : graph.getEdges()) {
+
+            e.getA().addEdge(e);
+            e.getB().addEdge(e);
+
+            e.getA().connect(e.getB());
+        }
+
+        // 4. Sort geometry last
+        for (Node n : graph.getNodes()) {
+            n.sortEdgesAndNeighbors();
+        }
+    }
+
+
 
     private boolean isFarEnough(double x, double y, List<Node> nodes) {
         for (Node n : nodes) {

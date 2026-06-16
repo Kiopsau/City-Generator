@@ -3,6 +3,8 @@ package citygen.city.roads;
 import java.util.ArrayList;
 import java.util.List;
 
+import citygen.city.roads.edges.Edge;
+
 public class Node {
     private int id; 
 
@@ -67,6 +69,32 @@ public class Node {
 
     public List<Edge> getEdges() {
         return edges; 
+    }
+
+
+
+
+
+    public void sortEdgesAndNeighbors() {
+        neighbors.sort(
+            (a, b) -> Double.compare(
+                Math.atan2(a.getY() - y, a.getX() - x),
+                Math.atan2(b.getY() - y, b.getX() - x)
+            )
+        );
+
+        edges.sort(
+            (a, b) -> Double.compare(
+                Math.atan2(
+                    (a.getA() == this ? a.getB().getY() : a.getA().getY()) - y,
+                    (a.getA() == this ? a.getB().getX() : a.getA().getX()) - x
+                ),
+                Math.atan2(
+                    (b.getA() == this ? b.getB().getY() : b.getA().getY()) - y,
+                    (b.getA() == this ? b.getB().getX() : b.getA().getX()) - x
+                )
+            )
+        );
     }
 
 

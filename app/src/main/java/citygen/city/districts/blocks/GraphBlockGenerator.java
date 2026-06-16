@@ -1,15 +1,14 @@
 package citygen.city.districts.blocks;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
-import citygen.city.roads.Edge;
 import citygen.city.roads.Node;
+import citygen.city.roads.edges.HalfEdge;
 import citygen.graph.Graph;
+import citygen.utils.Utils;
 
 public class GraphBlockGenerator {
     private Graph graph; 
@@ -18,176 +17,92 @@ public class GraphBlockGenerator {
         this.graph = graph; 
     }
 
-    /*This road network is an organically grown, tree-dominated street layout that expands outward from a 
-    central starting point. Roads branch incrementally from existing intersections, with a bias toward 
-    extending newer branches, creating a natural sense of urban sprawl rather than dense clustering around 
-    the center. Minimum spacing rules keep intersections evenly distributed, while proximity checks prevent 
-    roads from crowding one another or creating unrealistically narrow blocks. Occasional loop connections
-     introduce alternative routes and improve connectivity, avoiding the rigidity of a pure tree structure. 
-     After generation, any road crossings are converted into proper intersections and nearby junctions are 
-     merged, resulting in a clean, coherent network that resembles the street patterns commonly found in 
-     suburban developments, small towns, or organically evolved cities rather than a strict grid-based plan. */
+
+
 
 
     public Graph generate() {
+        Set<HalfEdge> visited = new HashSet<>();
 
-        List<List<Node>> faces = new ArrayList<>();
+        for (Node start : graph.getNodes()) {
 
-        Set<DirectedEdge> visited = new HashSet<>();
+            for (Node neighbor : start.getNeighbors()) {
 
-        for (Edge edge : graph.getEdges()) {
+                HalfEdge startHe = new HalfEdge(start, neighbor);
 
-            walkFace(edge.getA(), edge.getB(), visited, faces);
-            walkFace(edge.getB(), edge.getA(), visited, faces);
-        }
+                if (visited.contains(startHe)) continue;
 
-        removeOuterFace(faces); 
+                List<Node> face = new ArrayList<>();
 
-        for (List<Node> face : faces) {
-            graph.addBlock(new Block(face));
+                Node prev = start;
+                Node current = neighbor;
+
+                Node startNode = start;
+                Node startNext = neighbor;
+
+                while (true) {
+
+                    visited.add(new HalfEdge(prev, current));
+                    visited.add(new HalfEdge(current, prev));
+
+                    face.add(prev);
+
+                    Node next = getNextClockwiseNeighbor(current, prev);
+
+                    prev = current;
+                    current = next;
+
+                    if (prev == startNode && current == startNext) {
+                        break;
+                    }
+
+                    if (current == null) break;
+                }
+
+                if (face.size() > 2) {
+                    graph.addBlock(new Block(face));
+                }
+            }
         }
 
         return graph;
     }
 
-    private void walkFace(
-            Node startA,
-            Node startB,
-            Set<DirectedEdge> visited,
-            List<List<Node>> faces) {
 
-        DirectedEdge start = new DirectedEdge(startA, startB);
 
-        if (visited.contains(start)) {
-            return;
-        }
 
-        List<Node> face = new ArrayList<>();
 
-        Node prev = startA;
-        Node current = startB;
 
-        while (true) {
 
-            visited.add(new DirectedEdge(prev, current));
 
-            face.add(prev);
+    private Node getNextClockwiseNeighbor(Node current, Node from) {
+        List<Node> neighbors = current.getNeighbors();
 
-            Node next = getNextClockwise(prev, current);
-
-            Node oldCurrent = current;
-
-            current = next;
-            prev = oldCurrent;
-
-            if (prev == startA && current == startB) {
-                break;
-            }
-        }
-
-        if (face.size() >= 3) {
-            faces.add(face);
-        }
-    }
-
-    private Node getNextClockwise(Node previous, Node center) {
-
-        List<Node> neighbors = getSortedNeighbors(center);
-
-        int index = neighbors.indexOf(previous);
-
-        return neighbors.get(
-            (index - 1 + neighbors.size()) % neighbors.size()
-        );
-    }
-
-    private List<Node> getSortedNeighbors(Node node) {
-
-        List<Node> neighbors = new ArrayList<>();
-
-        for (Edge edge : node.getEdges()) {
-
-            Node other =
-                edge.getA() == node
-                    ? edge.getB()
-                    : edge.getA();
-
-            neighbors.add(other);
-        }
-
-        neighbors.sort(
-            Comparator.comparingDouble(
-                n -> Math.atan2(
-                    n.getY() - node.getY(),
-                    n.getX() - node.getX()
-                )
-            )
+        double baseAngle = Math.atan2(
+            from.getY() - current.getY(),
+            from.getX() - current.getX()
         );
 
-        return neighbors;
-    }
+        Node best = null;
+        double bestDiff = Double.POSITIVE_INFINITY;
 
-    private void removeOuterFace(List<List<Node>> faces) {
+        for (Node n : neighbors) {
 
-        if (faces.isEmpty()) {
-            return;
-        }
+            if (n == from) continue;
 
-        List<Node> largest = null;
-        double largestArea = -1;
+            double angle = Math.atan2(
+                n.getY() - current.getY(),
+                n.getX() - current.getX()
+            );
 
-        for (List<Node> face : faces) {
+            double diff = Utils.normalizeAngle(angle - baseAngle);
 
-            double area = Math.abs(area(face));
-
-            if (area > largestArea) {
-                largestArea = area;
-                largest = face;
+            if (diff > 0 && diff < bestDiff) {
+                bestDiff = diff;
+                best = n;
             }
         }
 
-        faces.remove(largest);
-    }
-
-    private double area(List<Node> polygon) {
-
-        double sum = 0;
-
-        for (int i = 0; i < polygon.size(); i++) {
-
-            Node a = polygon.get(i);
-            Node b = polygon.get((i + 1) % polygon.size());
-
-            sum += a.getX() * b.getY()
-                 - b.getX() * a.getY();
-        }
-
-        return sum * 0.5;
-    }
-
-    private static class DirectedEdge {
-
-        private final Node a;
-        private final Node b;
-
-        DirectedEdge(Node a, Node b) {
-            this.a = a;
-            this.b = b;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-
-            if (!(o instanceof DirectedEdge d)) {
-                return false;
-            }
-
-            return a == d.a && b == d.b;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(a, b);
-        }
+        return best;
     }
 }

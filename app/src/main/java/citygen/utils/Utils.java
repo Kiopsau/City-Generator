@@ -91,4 +91,10 @@ public class Utils {
         while (diff <= 0) diff += Math.PI * 2; 
         return diff;
     } 
+
+    public static double normalizeAngle(double a) {
+        while (a < 0) a += Math.PI * 2;
+        while (a >= Math.PI * 2) a -= Math.PI * 2;
+        return a;
+    }
 }
