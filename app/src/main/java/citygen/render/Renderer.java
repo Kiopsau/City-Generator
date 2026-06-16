@@ -14,6 +14,7 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import citygen.city.districts.blocks.Block;
+import citygen.city.districts.blocks.buildings.Building;
 import citygen.city.roads.Node;
 import citygen.city.roads.edges.Edge;
 import citygen.graph.Graph;
@@ -25,6 +26,7 @@ public class Renderer extends JPanel {
     private Graph city; 
 
     private Node hoveredNode; 
+    private Block hoveredBlock;
 
     private double zoom = 1.0;
     private double offsetX = 0;
@@ -46,13 +48,26 @@ public class Renderer extends JPanel {
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override   
             public void mouseMoved(MouseEvent e) {
+
                 double worldX = (e.getX() - offsetX) / zoom;
                 double worldY = (e.getY() - offsetY) / zoom;
 
                 hoveredNode = Utils.findNodeAt(worldX, worldY, city);
-                repaint(); 
+
+                hoveredBlock = null;
+
+                if (showBlocks) {
+                    for (Block block : city.getBlocks()) {
+                        if (isPointInBlock(block, worldX, worldY)) {
+                            hoveredBlock = block;
+                            break;
+                        }
+                    }
+                }
+
+                repaint();
             }
-        }); 
+        });
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -177,7 +192,7 @@ public class Renderer extends JPanel {
     } 
 
     private final List<Color> colors = List.of(
-        Color.BLACK, Color.WHITE, Color.RED, Color.GREEN,
+        Color.WHITE, Color.RED, Color.GREEN,
         Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA,
         Color.GRAY, Color.DARK_GRAY, Color.LIGHT_GRAY,
         Color.ORANGE, Color.PINK
@@ -185,8 +200,8 @@ public class Renderer extends JPanel {
 
 
     private void drawBlocks(Graphics2D g2) {
-        int i = 0;
-        if (!showBlocks) return; 
+        if (!showBlocks) return;
+
         for (Block block : city.getBlocks()) {
             List<Node> corners = block.getCorners();
             if (corners.size() < 3) continue;
@@ -199,11 +214,69 @@ public class Renderer extends JPanel {
                 yPoints[j] = (int) corners.get(j).getY();
             }
 
-            int colorIndex = Math.abs(block.getCorners().hashCode()) % colors.size(); 
-            g2.setColor(colors.get(colorIndex)); 
+            boolean hovered = (block == hoveredBlock);
 
+            // base color
+            int colorIndex = Math.abs(block.getCorners().hashCode()) % colors.size();
+            g2.setColor(colors.get(colorIndex));
             g2.fillPolygon(xPoints, yPoints, corners.size());
-            i++;
+
+            // hover overlay (this is the key trick)
+            if (hovered) {
+                g2.setColor(new Color(255, 255, 0, 80)); // soft highlight overlay
+                g2.fillPolygon(xPoints, yPoints, corners.size());
+
+                g2.setColor(Color.WHITE);
+                g2.drawPolygon(xPoints, yPoints, corners.size());
+
+                drawBuildings(g2, block);
+            }
         }
+    }
+
+    private void drawBuildings(Graphics2D g2, Block block) {
+        for (Building building : block.getBuildings()) {
+            List<double[]> shape = building.getShape(); 
+
+            g2.drawPolygon(
+                shape.stream().mapToInt(p -> (int) p[0]).toArray(), 
+                shape.stream().mapToInt(p -> (int) p[1]).toArray(), 
+                shape.size()
+            ); 
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private boolean isPointInBlock(Block block, double x, double y) {
+        List<Node> c = block.getCorners();
+        int n = c.size();
+        boolean inside = false;
+
+        for (int i = 0, j = n - 1; i < n; j = i++) {
+            double xi = c.get(i).getX();
+            double yi = c.get(i).getY();
+            double xj = c.get(j).getX();
+            double yj = c.get(j).getY();
+
+            boolean intersect =
+                    ((yi > y) != (yj > y)) &&
+                    (x < (xj - xi) * (y - yi) / (yj - yi + 1e-9) + xi);
+
+            if (intersect) inside = !inside;
+        }
+
+        return inside;
     }
 }

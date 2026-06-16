@@ -14,17 +14,18 @@ public class Block {
     private double area; 
 
     public Block(List<Node> corners) {
-        this.corners = corners;
-        this.buildings = new ArrayList<>(); 
-
-        this.area = getArea(); 
-    } 
+        this.corners = corners != null ? corners : new ArrayList<>();
+        this.buildings = new ArrayList<>();
+        this.area = getArea();
+    }
 
     public List<Node> getCorners() {
         return corners; 
     } 
 
-
+    public List<Building> getBuildings() {
+        return buildings; 
+    }
 
 
 
@@ -43,6 +44,23 @@ public class Block {
         }
         return Math.abs(A) / 2.0; 
     } 
+
+
+
+    public double[] getCentroid() {
+        double cx = 0;
+        double cy = 0;
+
+        for (Node n : corners) {
+            cx += n.getX();
+            cy += n.getY();
+        }
+
+        return new double[]{
+            cx / corners.size(),
+            cy / corners.size()
+        };
+    }
 
     @Override 
     public String toString() {

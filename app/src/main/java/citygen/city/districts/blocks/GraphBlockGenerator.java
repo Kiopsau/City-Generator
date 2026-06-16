@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import citygen.city.districts.blocks.buildings.BlockBuildingGenerator;
 import citygen.city.roads.Node;
 import citygen.city.roads.edges.HalfEdge;
 import citygen.graph.Graph;
@@ -60,9 +61,16 @@ public class GraphBlockGenerator {
                 }
 
                 if (face.size() > 2) {
-                    graph.addBlock(new Block(face));
+                    graph.addBlock(new Block(face)); 
                 }
             }
+        }
+
+
+        for (Block block : graph.getBlocks()) {
+            block.getBuildings().addAll(
+                BlockBuildingGenerator.generate(block)
+            );
         }
 
         return graph;
